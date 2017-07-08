@@ -1,13 +1,6 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: Hariharan D
-date: Saturday, 08^th^ July 2017
-output: 
-  html_document:
-    toc: false
-    toc_float: false
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
+Hariharan D  
+Saturday, 08^th^ July 2017  
 
 <style>
 body {
@@ -27,20 +20,19 @@ This document contains necessary code and output report that answers the questio
 
 Set the chunk options.
 
-```{r Set Options, include = TRUE}
 
+```r
 library(knitr)
 
 knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, message = FALSE, fig.align = "center")
-
 ```
 
 Load the necessary libraries.
 
 Note: It is assumed that the below libraries are aready installed.
 
-```{r R Library}
 
+```r
 library(plyr)
 
 library(dplyr)
@@ -48,7 +40,6 @@ library(dplyr)
 library(lattice)
 
 library(ggplot2)
-
 ```
 
 
@@ -58,30 +49,72 @@ library(ggplot2)
 
 Note: It is assumed that **activity.csv** file is already downloaded from **[here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)**, unzipped and saved in the working directory.
 
-```{r Load Data}
 
-activity_data <- read.csv("activity.csv", header=TRUE, sep=",", stringsAsFactors = FALSE)
+```r
+activity_data <- read.csv("activity.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
 
 str(activity_data)
+```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : chr  "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+```r
 summary(activity_data)
+```
 
+```
+##      steps            date              interval     
+##  Min.   :  0.00   Length:17568       Min.   :   0.0  
+##  1st Qu.:  0.00   Class :character   1st Qu.: 588.8  
+##  Median :  0.00   Mode  :character   Median :1177.5  
+##  Mean   : 37.38                      Mean   :1177.5  
+##  3rd Qu.: 12.00                      3rd Qu.:1766.2  
+##  Max.   :806.00                      Max.   :2355.0  
+##  NA's   :2304
+```
+
+```r
 head(activity_data)
+```
 
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+```r
 tail(activity_data)
+```
 
+```
+##       steps       date interval
+## 17563    NA 2012-11-30     2330
+## 17564    NA 2012-11-30     2335
+## 17565    NA 2012-11-30     2340
+## 17566    NA 2012-11-30     2345
+## 17567    NA 2012-11-30     2350
+## 17568    NA 2012-11-30     2355
 ```
 
 * Process/transform the data (if necessary) into a format suitable for your analysis
 
 Subsetting data to remove "NA" values. Formatting variable "date" from "Character" to "Date" format
 
-```{r Pre-Process Data}
 
+```r
 activity_pattern <- subset(activity_data, !is.na(activity_data$steps))
 
 activity_pattern$date <- as.Date(activity_pattern$date, format = "%Y-%m-%d")
-
 ```
 
 ### What is mean total number of steps taken per day?
@@ -93,10 +126,9 @@ For this part of the assignment, you can ignore the missing values in the datase
 
 Use **"ddply()"** function from **"plyr"** package to summarize steps grouped by date.
 
-```{r Total Steps}
 
-total_steps <- ddply(activity_pattern,.(date),summarize,steps=sum(steps))
-
+```r
+total_steps <- ddply(activity_pattern, .(date), summarize, steps = sum(steps))
 ```
 
 
@@ -104,27 +136,38 @@ total_steps <- ddply(activity_pattern,.(date),summarize,steps=sum(steps))
 
 Use **"histogram()"** function from **"lattice"** package to plot the total number of steps taken each day.
 
-```{r histogram}
 
-histogram(~steps, data=total_steps, pch=19, main="Histogram of Total Number of Steps Taken Each Day", xlab = "Total Number of Steps", ylab = "Frequency",col="steelblue")
-
+```r
+histogram(~steps, data = total_steps, pch = 19, main = "Histogram of Total Number of Steps Taken Each Day", 
+    xlab = "Total Number of Steps", ylab = "Frequency", col = "steelblue")
 ```
+
+<img src="PA1_template_files/figure-html/histogram-1.png" style="display: block; margin: auto;" />
 
 
 * Calculate and report the mean and median of the total number of steps taken per day
 
 Use **"mean()"** and **"median()"** function to calculate the Mean and Median of the total number of steps taken per day.
 
-```{r mean median}
 
+```r
 mean_steps <- mean(total_steps$steps)
 
 mean_steps
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 median_steps <- median(total_steps$steps)
 
 median_steps
+```
 
+```
+## [1] 10765
 ```
 
 
@@ -134,23 +177,31 @@ median_steps
 
 Use **"ddply()"** function from **"plyr"** package to summarize steps grouped by interval. Plot a time series with the interval and average number of steps taken across all days using **"ggplot()"** function from **"ggplot2"** package.
 
-```{r daily activity}
 
-interval_steps <- ddply(activity_pattern,.(interval),summarize,steps=mean(steps))
+```r
+interval_steps <- ddply(activity_pattern, .(interval), summarize, steps = mean(steps))
 
-ggplot(interval_steps, aes(x = interval, y = steps)) + geom_line(size=0.8, color="steelblue") + labs(title="Average Number of Steps Taken During 5 Minute Interval", x = "Interval (in Minutes)", y = "Average Number of Steps Taken") + theme_bw() + theme(plot.title = element_text(hjust = 0.5))
-
+ggplot(interval_steps, aes(x = interval, y = steps)) + geom_line(size = 0.8, 
+    color = "steelblue") + labs(title = "Average Number of Steps Taken During 5 Minute Interval", 
+    x = "Interval (in Minutes)", y = "Average Number of Steps Taken") + theme_bw() + 
+    theme(plot.title = element_text(hjust = 0.5))
 ```
+
+<img src="PA1_template_files/figure-html/daily activity-1.png" style="display: block; margin: auto;" />
 
 
 * Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 Calculate maximum number of steps across 5-minute interval averaged across all the days using **"which()"** and **"max()"** function
 
-```{r max steps}
 
-interval_steps[which.max(interval_steps$steps),]
+```r
+interval_steps[which.max(interval_steps$steps), ]
+```
 
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 
 
@@ -163,12 +214,21 @@ Note that there are a number of days/intervals where there are missing values (c
 
 Calculate the total number of missing values in the dataset using **"sum()"** and **"is.na()"** function.
 
-```{r sum missing values}
 
+```r
 sum(is.na(activity_data$steps))
+```
 
+```
+## [1] 2304
+```
+
+```r
 sum(is.na(interval_steps$steps))
+```
 
+```
+## [1] 0
 ```
 
 
@@ -176,12 +236,11 @@ sum(is.na(interval_steps$steps))
 
 Fill missing values in the data set with the average number of steps for each interval across all of the days using the **"merge()"** function.
 
-```{r fill missing values}
 
-colnames(interval_steps) <- c("interval","mean_steps")
+```r
+colnames(interval_steps) <- c("interval", "mean_steps")
 
-activity_impute <- merge(activity_data,interval_steps,by="interval")
-
+activity_impute <- merge(activity_data, interval_steps, by = "interval")
 ```
 
 
@@ -189,12 +248,15 @@ activity_impute <- merge(activity_data,interval_steps,by="interval")
 
 Fill the missing values os steps in the original data set and validate the same.
 
-```{r impute data}
 
+```r
 activity_impute$steps[is.na(activity_impute$steps)] <- activity_impute$mean_steps[is.na(activity_impute$steps)]
 
 sum(is.na(activity_impute$steps))
+```
 
+```
+## [1] 0
 ```
 
 
@@ -202,22 +264,36 @@ sum(is.na(activity_impute$steps))
 
 Use **"histogram()"** function from **"lattice"** package to plot the total number of steps taken each day with missing values filled-in. Use **"mean()"** and **"median()"** function to re-calculate the Mean and Median of the total number of steps taken per day with missing values filled-in.
 
-```{r histogram impute}
 
+```r
 activity_impute$date <- as.Date(activity_impute$date, format = "%Y-%m-%d")
 
-impute_steps <- ddply(activity_impute,.(date),summarize,steps=sum(steps))
+impute_steps <- ddply(activity_impute, .(date), summarize, steps = sum(steps))
 
-histogram(~steps, data=impute_steps, pch=19, main="Histogram of Total Number of Steps Taken Each Day", xlab = "Total Number of Steps", ylab = "Frequency",col="steel blue")
+histogram(~steps, data = impute_steps, pch = 19, main = "Histogram of Total Number of Steps Taken Each Day", 
+    xlab = "Total Number of Steps", ylab = "Frequency", col = "steel blue")
+```
 
+<img src="PA1_template_files/figure-html/histogram impute-1.png" style="display: block; margin: auto;" />
+
+```r
 impute_mean_steps <- mean(impute_steps$steps)
 
 impute_mean_steps
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 impute_median_steps <- median(impute_steps$steps)
 
 impute_median_steps
+```
 
+```
+## [1] 10766.19
 ```
 
 Mean is unaffected by data imputation while there is change in Median value.
@@ -231,14 +307,14 @@ For this part the weekdays() function may be of some help here. Use the dataset 
 
 Create a new column in the dataset to hold the weekday and weekend information as factors which is calculated using **"weekdays()"** and **"as.factor()"** functions.
 
-```{r activity impute}
 
+```r
 activity_impute$day_of_week <- weekdays(activity_impute$date)
 
-activity_impute$weekend <- as.factor(activity_impute$day_of_week=="Saturday"|activity_impute$day_of_week=="Sunday")
+activity_impute$weekend <- as.factor(activity_impute$day_of_week == "Saturday" | 
+    activity_impute$day_of_week == "Sunday")
 
 levels(activity_impute$weekend) <- c("Weekday", "Weekend")
-
 ```
 
 
@@ -247,10 +323,14 @@ levels(activity_impute$weekend) <- c("Weekday", "Weekend")
 Use **"ddply()"** function from **"plyr"** package to summarize steps grouped by interval and weekend. Plot a time series with the interval and average number of steps taken across all days for weekday and weekend using **"ggplot()"** function from **"ggplot2"** package.
 
 
-```{r ggplot weekend}
 
-week_steps <- ddply(activity_impute,.(interval,weekend),summarize,steps=mean(steps))
+```r
+week_steps <- ddply(activity_impute, .(interval, weekend), summarize, steps = mean(steps))
 
-ggplot(week_steps, aes(x = interval, y = steps, color = weekend)) + geom_line(size=0.8) + facet_grid(weekend~.) + labs(title="Average Number of Steps Taken During Weekday and Weekend", x = "Interval (in Minutes)", y = "Average Number of Steps Taken") + theme_bw() + theme(plot.title = element_text(hjust = 0.5))
-
+ggplot(week_steps, aes(x = interval, y = steps, color = weekend)) + geom_line(size = 0.8) + 
+    facet_grid(weekend ~ .) + labs(title = "Average Number of Steps Taken During Weekday and Weekend", 
+    x = "Interval (in Minutes)", y = "Average Number of Steps Taken") + theme_bw() + 
+    theme(plot.title = element_text(hjust = 0.5))
 ```
+
+<img src="PA1_template_files/figure-html/ggplot weekend-1.png" style="display: block; margin: auto;" />
